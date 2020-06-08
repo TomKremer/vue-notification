@@ -347,12 +347,19 @@ var Component = {
     closeOnClick: {
       type: Boolean,
       default: true
+    },
+
+    pauseOnHover: {
+      type: Boolean,
+      default: false
     }
+
   },
   data: function data() {
     return {
       list: [],
-      velocity: __WEBPACK_IMPORTED_MODULE_0__index__["default"].params.velocity
+      velocity: __WEBPACK_IMPORTED_MODULE_0__index__["default"].params.velocity,
+      timerControl: ""
     };
   },
   mounted: function mounted() {
@@ -405,6 +412,16 @@ var Component = {
         this.destroy(item);
       }
     },
+    pauseTimeout: function pauseTimeout() {
+      if (this.pauseOnHover) {
+        this.timerControl.pause();
+      }
+    },
+    resumeTimeout: function resumeTimeout() {
+      if (this.pauseOnHover) {
+        this.timerControl.resume();
+      }
+    },
     addItem: function addItem(event) {
       var _this = this;
 
@@ -444,9 +461,9 @@ var Component = {
       };
 
       if (duration >= 0) {
-        item.timer = setTimeout(function () {
-          _this.destroy(item);
-        }, item.length);
+        this.timerControl = new __WEBPACK_IMPORTED_MODULE_2__util__["c" /* Timer */](function () {
+          return _this.destroy(item);
+        }, item.length, item);
       }
 
       var direction = this.reverse ? !this.botToTop : this.botToTop;
@@ -658,6 +675,7 @@ var parse = function parse(value) {
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "b", function() { return Id; });
 /* unused harmony export split */
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return listToDirection; });
+/* harmony export (immutable) */ __webpack_exports__["c"] = Timer;
 var directions = {
   x: ['left', 'center', 'right'],
   y: ['top', 'bottom']
@@ -697,6 +715,24 @@ var listToDirection = function listToDirection(value) {
   });
 
   return { x: x, y: y };
+};
+
+function Timer(callback, delay, notifItem) {
+  var start = void 0,
+      remaining = delay;
+
+  this.pause = function () {
+    clearTimeout(notifItem.timer);
+    remaining -= Date.now() - start;
+  };
+
+  this.resume = function () {
+    start = Date.now();
+    clearTimeout(notifItem.timer);
+    notifItem.timer = setTimeout(callback, remaining);
+  };
+
+  this.resume();
 };
 
 /***/ }),
@@ -812,6 +848,7 @@ module.exports = Component.exports
 module.exports={render:function (){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;
   return _c('transition-group', {
     attrs: {
+      "tag": "div",
       "css": false
     },
     on: {
@@ -847,6 +884,10 @@ module.exports={render:function (){var _vm=this;var _h=_vm.$createElement;var _c
       style: (_vm.notifyWrapperStyle(item)),
       attrs: {
         "data-id": item.id
+      },
+      on: {
+        "mouseenter": _vm.pauseTimeout,
+        "mouseleave": _vm.resumeTimeout
       }
     }, [_vm._t("body", [_c('div', {
       class: _vm.notifyClass(item),
@@ -879,6 +920,7 @@ module.exports={render:function (){var _vm=this;var _h=_vm.$createElement;var _c
 module.exports={render:function (){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;
   return _c('transition-group', {
     attrs: {
+      "tag": "div",
       "name": _vm.name
     }
   }, [_vm._t("default")], 2)
@@ -895,7 +937,7 @@ var content = __webpack_require__(10);
 if(typeof content === 'string') content = [[module.i, content, '']];
 if(content.locals) module.exports = content.locals;
 // add CSS to SSR context
-__webpack_require__(18)("2901aeae", content, true);
+__webpack_require__(18)("7c12cf46", content, true);
 
 /***/ }),
 /* 18 */
